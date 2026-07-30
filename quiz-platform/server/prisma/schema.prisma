@@ -1,1 +1,158 @@
-.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ORGANIZER
+  PARTICIPANT
+}
+
+enum QuestionType {
+  TEXT
+  IMAGE
+}
+
+enum AnswerMode {
+  SINGLE
+  MULTIPLE
+}
+
+enum SessionStatus {
+  WAITING
+  ACTIVE
+  FINISHED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+
+  quizzes      Quiz[]
+  participants Participant[]
+}
+
+model Category {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  quizzes Quiz[]
+}
+
+model Quiz {
+  id              Int      @id @default(autoincrement())
+  title           String
+  description     String?
+  coverImage      String?
+  timePerQuestion Int
+  isActive        Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  authorId Int
+  author   User @relation(fields: [authorId], references: [id])
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  questions Question[]
+  sessions  QuizSession[]
+
+  @@index([authorId])
+  @@index([categoryId])
+}
+
+model Question {
+  id          Int          @id @default(autoincrement())
+  text        String
+  imageUrl    String?
+  type        QuestionType
+  answerMode  AnswerMode
+  points      Int          @default(1)
+  orderNumber Int
+
+  quizId Int
+  quiz   Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  options AnswerOption[]
+  answers ParticipantAnswer[]
+
+  @@index([quizId])
+}
+
+model AnswerOption {
+  id        Int     @id @default(autoincrement())
+  text      String
+  isCorrect Boolean
+
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  answers ParticipantAnswer[]
+
+  @@index([questionId])
+}
+
+model QuizSession {
+  id              Int            @id @default(autoincrement())
+  roomCode        String         @unique @db.VarChar(6)
+  status          SessionStatus  @default(WAITING)
+  currentQuestion Int            @default(0)
+
+  maxParticipants Int?
+
+  createdAt  DateTime @default(now())
+  startedAt  DateTime?
+  finishedAt DateTime?
+
+  quizId Int
+  quiz   Quiz @relation(fields: [quizId], references: [id])
+
+  participants Participant[]
+
+  @@index([quizId])
+}
+
+model Participant {
+  id       Int      @id @default(autoincrement())
+  score    Int      @default(0)
+  place    Int?
+  joinedAt DateTime @default(now())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  sessionId Int
+  session   QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  answers ParticipantAnswer[]
+
+  @@index([userId])
+  @@index([sessionId])
+}
+
+model ParticipantAnswer {
+  id         Int      @id @default(autoincrement())
+  answeredAt DateTime @default(now())
+
+  participantId Int
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id])
+
+  answerOptionId Int
+  answerOption AnswerOption @relation(fields: [answerOptionId], references: [id])
+
+  @@index([participantId])
+  @@index([questionId])
+}
