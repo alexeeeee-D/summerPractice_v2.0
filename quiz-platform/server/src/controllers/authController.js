@@ -8,9 +8,30 @@ export async function register(req, res) {
             message: "User successfully created",
             user
         });
+
     } catch (error) {
+
         res.status(400).json({
             error: error.message
         });
+
     }
+}
+
+export async function login(req, res) {
+
+    try {
+
+        const result = await authService.login(req.body);
+
+        res.json(result);
+
+    } catch (error) {
+
+        res.status(401).json({
+            error: error.message
+        });
+
+    }
+
 }

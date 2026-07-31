@@ -30,7 +30,7 @@ enum SessionStatus {
 
 model User {
   id        Int      @id @default(autoincrement())
-  username  String
+  username  String   @unique
   email     String   @unique
   password  String
   role      Role
@@ -54,6 +54,7 @@ model Quiz {
   coverImage      String?
   timePerQuestion Int
   isActive        Boolean  @default(true)
+  isPublished     Boolean  @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -87,6 +88,7 @@ model Question {
   answers ParticipantAnswer[]
 
   @@index([quizId])
+  @@unique([quizId, orderNumber])
 }
 
 model AnswerOption {
@@ -103,15 +105,16 @@ model AnswerOption {
 }
 
 model QuizSession {
-  id              Int            @id @default(autoincrement())
-  roomCode        String         @unique @db.VarChar(6)
-  status          SessionStatus  @default(WAITING)
-  currentQuestion Int            @default(0)
+  id                Int            @id @default(autoincrement())
+  roomCode          String         @unique @db.VarChar(6)
+  status            SessionStatus  @default(WAITING)
+  currentQuestion   Int            @default(0)
+  questionStartedAt DateTime?
 
   maxParticipants Int?
 
-  createdAt  DateTime @default(now())
-  startedAt  DateTime?
+  createdAt DateTime @default(now())
+  startedAt DateTime?
   finishedAt DateTime?
 
   quizId Int
@@ -123,10 +126,11 @@ model QuizSession {
 }
 
 model Participant {
-  id       Int      @id @default(autoincrement())
-  score    Int      @default(0)
-  place    Int?
-  joinedAt DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  nickname  String
+  score     Int      @default(0)
+  place     Int?
+  joinedAt  DateTime @default(now())
 
   userId Int
   user   User @relation(fields: [userId], references: [id])
@@ -145,13 +149,13 @@ model ParticipantAnswer {
   answeredAt DateTime @default(now())
 
   participantId Int
-  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
 
   questionId Int
   question   Question @relation(fields: [questionId], references: [id])
 
   answerOptionId Int
-  answerOption AnswerOption @relation(fields: [answerOptionId], references: [id])
+  answerOption   AnswerOption @relation(fields: [answerOptionId], references: [id])
 
   @@index([participantId])
   @@index([questionId])
