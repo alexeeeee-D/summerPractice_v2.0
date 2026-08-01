@@ -80,3 +80,25 @@ export async function deleteQuestion(req, res) {
     }
 
 }
+
+export async function updateQuestion(req, res) {
+
+    try {
+
+        const question =
+            await questionService.updateQuestion(
+                req.params.id,
+                req.body
+            );
+
+        res.json(question);
+
+    } catch (error) {
+
+        res.status(400).json({
+            error: error.message
+        });
+
+    }
+
+}

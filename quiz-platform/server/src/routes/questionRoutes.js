@@ -11,6 +11,8 @@ import {
 
     getQuestion,
 
+    updateQuestion,
+
     deleteQuestion
 
 } from "../controllers/questionController.js";
@@ -26,6 +28,8 @@ router.post("/", createQuestion);
 router.get("/quiz/:quizId", getQuestions);
 
 router.get("/:id", getQuestion);
+
+router.put("/:id", updateQuestion);
 
 router.delete("/:id", deleteQuestion);
 

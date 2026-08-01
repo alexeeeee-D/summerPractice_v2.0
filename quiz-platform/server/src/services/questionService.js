@@ -115,3 +115,51 @@ export async function deleteQuestion(id) {
     };
 
 }
+
+export async function updateQuestion(id, data) {
+
+    const {
+        text,
+        imageUrl,
+        type,
+        answerMode,
+        points,
+        orderNumber,
+        options
+    } = data;
+
+    return await prisma.$transaction(async (tx) => {
+
+        await tx.answerOption.deleteMany({
+            where: {
+                questionId: Number(id)
+            }
+        });
+
+        const question = await tx.question.update({
+            where: {
+                id: Number(id)
+            },
+            data: {
+                text,
+                imageUrl,
+                type,
+                answerMode,
+                points,
+                orderNumber,
+                options: {
+                    create: options.map(option => ({
+                        text: option.text,
+                        isCorrect: option.isCorrect
+                    }))
+                }
+            },
+            include: {
+                options: true
+            }
+        });
+
+        return question;
+    });
+
+}
