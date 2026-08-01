@@ -1,61 +1,85 @@
 import prisma from "../config/prisma.js";
 
-export async function createQuiz(data, organizerId) {
-
+export async function createQuiz(data, authorId) {
     const {
         title,
         description,
-        category,
-        timeLimit
+        categoryId,
+        coverImage,
+        timePerQuestion
     } = data;
 
-    if (!title || !category || !timeLimit) {
+    if (!title || !categoryId || !timePerQuestion) {
         throw new Error("Required fields are missing");
     }
 
-    const quiz = await prisma.quiz.create({
+    return await prisma.quiz.create({
         data: {
             title,
             description,
-            category,
-            timeLimit,
-            organizerId
+            coverImage,
+            timePerQuestion: Number(timePerQuestion),
+            categoryId: Number(categoryId),
+            authorId
+        },
+        include: {
+            category: true
         }
     });
-
-    return quiz;
 }
 
-export async function getAllQuizzes(organizerId) {
-
-    return prisma.quiz.findMany({
+export async function getQuizzes(authorId) {
+    return await prisma.quiz.findMany({
         where: {
-            organizerId
+            authorId
+        },
+        include: {
+            category: true,
+            questions: true
         },
         orderBy: {
             createdAt: "desc"
         }
     });
-
 }
 
-export async function getQuiz(id) {
-
-    return prisma.quiz.findUnique({
+export async function getQuizById(id) {
+    const quiz = await prisma.quiz.findUnique({
         where: {
             id: Number(id)
+        },
+        include: {
+            category: true,
+            questions: {
+                include: {
+                    options: true
+                }
+            }
         }
     });
 
+    if (!quiz) {
+        throw new Error("Quiz not found");
+    }
+
+    return quiz;
 }
 
 export async function updateQuiz(id, data) {
 
-    return prisma.quiz.update({
+    return await prisma.quiz.update({
         where: {
             id: Number(id)
         },
-        data
+        data: {
+            ...data,
+            categoryId: data.categoryId
+                ? Number(data.categoryId)
+                : undefined,
+            timePerQuestion: data.timePerQuestion
+                ? Number(data.timePerQuestion)
+                : undefined
+        }
     });
 
 }
@@ -68,4 +92,7 @@ export async function deleteQuiz(id) {
         }
     });
 
+    return {
+        message: "Quiz deleted"
+    };
 }
