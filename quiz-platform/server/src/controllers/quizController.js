@@ -46,7 +46,8 @@ export async function getQuizById(req, res) {
     try {
 
         const quiz = await quizService.getQuizById(
-            req.params.id
+            req.params.id,
+            req.user.id
         );
 
         res.json(quiz);
@@ -67,6 +68,7 @@ export async function updateQuiz(req, res) {
 
         const quiz = await quizService.updateQuiz(
             req.params.id,
+            req.user.id,
             req.body
         );
 
@@ -87,7 +89,8 @@ export async function deleteQuiz(req, res) {
     try {
 
         const result = await quizService.deleteQuiz(
-            req.params.id
+            req.params.id,
+            req.user.id
         );
 
         res.json(result);

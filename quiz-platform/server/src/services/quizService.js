@@ -43,10 +43,12 @@ export async function getQuizzes(authorId) {
     });
 }
 
-export async function getQuizById(id) {
-    const quiz = await prisma.quiz.findUnique({
+export async function getQuizById(id, authorId) {
+
+    const quiz = await prisma.quiz.findFirst({
         where: {
-            id: Number(id)
+            id: Number(id),
+            authorId
         },
         include: {
             category: true,
@@ -65,7 +67,18 @@ export async function getQuizById(id) {
     return quiz;
 }
 
-export async function updateQuiz(id, data) {
+export async function updateQuiz(id, authorId, data) {
+
+    const quiz = await prisma.quiz.findFirst({
+        where: {
+            id: Number(id),
+            authorId
+        }
+    });
+
+    if (!quiz) {
+        throw new Error("Quiz not found");
+    }
 
     return await prisma.quiz.update({
         where: {
@@ -84,7 +97,18 @@ export async function updateQuiz(id, data) {
 
 }
 
-export async function deleteQuiz(id) {
+export async function deleteQuiz(id, authorId) {
+
+    const quiz = await prisma.quiz.findFirst({
+        where: {
+            id: Number(id),
+            authorId
+        }
+    });
+
+    if (!quiz) {
+        throw new Error("Quiz not found");
+    }
 
     await prisma.quiz.delete({
         where: {
@@ -95,4 +119,5 @@ export async function deleteQuiz(id) {
     return {
         message: "Quiz deleted"
     };
+
 }

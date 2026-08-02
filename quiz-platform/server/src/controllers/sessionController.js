@@ -20,3 +20,25 @@ export async function createSession(req, res) {
     }
 
 }
+
+export async function joinSession(req, res) {
+
+    try {
+
+        const participant =
+            await sessionService.joinSession(
+                req.body,
+                req.user.id
+            );
+
+        res.status(201).json(participant);
+
+    } catch (error) {
+
+        res.status(400).json({
+            error: error.message
+        });
+
+    }
+
+}
