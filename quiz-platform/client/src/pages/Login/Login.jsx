@@ -31,10 +31,18 @@ function Login() {
             const response = await login(form);
 
             auth.login(response.data.user, response.data.token);
-            
+
             alert("Вход выполнен!");
 
-            navigate("/");
+            if (response.data.user.role === "ORGANIZER") {
+
+                navigate("/organizer");
+
+            } else {
+
+                navigate("/participant");
+
+            }
 
         } catch (error) {
 
