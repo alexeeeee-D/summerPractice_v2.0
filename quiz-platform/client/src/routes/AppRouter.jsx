@@ -5,8 +5,7 @@ import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 
 import Dashboard from "../pages/organizer/Dashboard/Dashboard";
-import CreateQuiz from "../pages/organizer/CreateQuiz/CreateQuiz";
-
+import CreateQuiz from "../pages/organizer/CreateQuiz/CreateQuiz.jsx";
 import JoinRoom from "../pages/participant/JoinRoom/JoinRoom";
 
 import ProtectedRoute from "./ProtectedRoute";
